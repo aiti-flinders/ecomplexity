@@ -1,25 +1,30 @@
 Package: ecomplexity
-Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Title: Functions for Common Economic Complexity Operations
+Version: 0.0.0.9000
+Authors@R: 
+ person("Hamish", "Gamble", , "hamish.gamble@flinders.edu.au", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-1277-1227"))
+Description: This package contains helper functions for some commonly requested Economic Complexity analysis.
+License: MIT + file LICENSE
 Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
 LazyData: true
-Imports:
+RoxygenNote: 7.3.1
+Imports: 
+    complexitydata (>= 0.0.0.9000),
+    cowplot,
     dplyr,
+    economiccomplexity,
+    ggplot2,
+    ggraph,
+    igraph,
+    scales,
+    strayr (>= 0.2.2.9002),
+    tibble,
     tidyr,
-    stringr,
-    readr,
-    magrittr,
-    reticulate,
-    RSQLite,
-    tibble
-RoxygenNote: 7.2.3
+    treemapify
+Remotes: 
+    aiti-flinders/complexitydata,
+    runapp-aus/strayr
 Depends: 
     R (>= 2.10)
-Suggests: 
-    testthat
