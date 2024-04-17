@@ -31,16 +31,6 @@
 #' @source \url{https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/3BAL1O/WQZPYX&version=4.0}
 "product_data_all"
 
-#' Harmonised System (1992) product colours.
-#' 
-#' Colour groupings as used by the Atlas of Economic Complexity publication for product spaces.
-#' @format A tibble with 1,241 rows and 3 columns:
-#' \describe{
-#' \item{hs4}{character representation of the product code - HS92 4 digits}
-#' \item{color}{hex code of product colour}
-#' \item{product_id}{id}
-#' }
-"product_colours"
 
 #' Atlas of Economic Complexity Countries.
 #' 
