@@ -1,3 +1,14 @@
+#' Economic complexity rank time series 
+#'
+#' @param data complexity dataset from `complexitydata` package
+#'
+#' @return ggraph2 object
+#' @export
+#'
+#' @examples \dontrun{
+#' library(complexitydata) 
+#' graph_complexity_rank(data = state_economic_complexity)
+#' }
 graph_complexity_rank <- function(data) {
   
   data_final <- data |> 
@@ -45,6 +56,19 @@ graph_complexity_rank <- function(data) {
   
 }
 
+#' Export Tree Map.
+#' 
+#' Colours adjusted to match Atlas of Economic Complexity. 
+#'
+#' @param year year
+#' @param region which region to draw the map. Only Australian States supported. 
+#'
+#' @return ggraph2 object
+#' @export
+#'
+#' @examples \dontrun{
+#' graph_complexity_tree(2021, "SA")
+#' }
 graph_complexity_tree <- function(year, region) {
   
   state_economic_complexity |> 

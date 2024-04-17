@@ -2,6 +2,8 @@
 
 export(add_product_colours)
 export(add_product_names)
+export(graph_complexity_rank)
+export(graph_complexity_tree)
 importFrom(complexitydata,calculate_complexity)
 importFrom(complexitydata,calculate_complexity_time_series)
 importFrom(grDevices,rgb)
