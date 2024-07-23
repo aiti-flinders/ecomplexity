@@ -71,8 +71,8 @@ graph_complexity_rank <- function(data) {
 #' }
 graph_complexity_tree <- function(year, region) {
   
-  state_economic_complexity |> 
-    dplyr::left_join(complexitydata::atlas_pci, by = c("hs_product_code", "year")) |> 
+  data <- read_complexitydata("state_economic_complexity") |> 
+    dplyr::inner_join(complexitydata::atlas_pci, by = c("hs_product_code", "year")) |> 
     dplyr::filter(year == {{year}},
                   location_code == {{region}},
                   hs_product_code != "unspecified") |>
@@ -105,7 +105,7 @@ graph_complexity_tree <- function(year, region) {
 
 graph_complexity_product_space <- function(country, year, services = FALSE) {
     
-    working_data <- complexitydata::combined_exports |> 
+    working_data <- read_complexitydata("combined_exports") |> 
       dplyr::filter(year == {{year}},
                     !is.na(as.numeric(hs_product_code)))
     
