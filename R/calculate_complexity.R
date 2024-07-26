@@ -63,6 +63,99 @@ calculate_complexity <- function(data, region, product, value, year) {
   
 }
 
+
+
+#' Calculate economic complexity indicators using Davies and Mare 2021 method of weighted correlations.
+#'
+#' @param data data suitable for calculating complexity.
+#' @param region variable in `data` which corresponds to a region.
+#' @param product variable in `data` which corresponds to a product. 
+#' @param value variable in `data` which corresponds to a value.
+#' @param verbose logical. FALSE (the default) provides no messages to the user. 
+#'
+#' @return the supplied `data` with calculated city and activity complexity. 
+#' @export
+#'
+#' @examples \dontrun{
+#' 
+#' calculate_complexity_shares(data, region = "sa3", product = "indp", value = "count")
+#' 
+#' }
+#' 
+#' @importFrom stats cor cov.wt sd setNames
+calculate_complexity_shares <- function(data, region, product, value, verbose = FALSE) {
+  
+  m <- data |> 
+    tidyr::pivot_wider(id_cols = {{region}},
+                       names_from = {{product}},
+                       values_from = {{value}}) |> 
+    tibble::column_to_rownames(var = region) |> 
+    as.matrix()
+  
+  activity_share <- m / rowSums(m)
+  national_share_employment <- rowSums(m) / sum(m)
+  
+  # Relatedness of activities is the weighted covariance between the local share vectors for activities i and j
+  # weighted by each regions share of total employment. This is equivalent to the weighted correlation. 
+  # The relatedness between each activity is mapped to the interval [0,1]
+  
+  r_aa <- 0.5*(stats::cov.wt(x = activity_share, wt = national_share_employment, cor = TRUE)$cor + 1)
+  
+  # Complexity of activity a is the element a of the standardized second eigenvector of the row-standardized relatedness matrix r_aa.
+  
+  complexity <- list()
+  complexity$activity <- Re(eigen(r_aa/rowSums(r_aa))$vector[,2])
+  #standardize
+  complexity$activity <- (complexity$activity - mean(complexity$activity))/sd(complexity$activity)
+  
+  names(complexity$activity) <- colnames(m)
+  
+  # Complexity should be positively correlated with the weighted mean size of cities that contain activity a. 
+  ## Think: could it just be positively correlated with city size?
+  
+  weighted_mean_city_size <- colSums(m/colSums(m)*rowSums(m))
+  
+  if (cor(complexity$activity, weighted_mean_city_size) < 0) {
+    complexity$activity <- -1*complexity$activity
+  }
+  
+  rpt_activity <-  message(glue::glue("most complex activity: {names(complexity$activity[complexity$activity == max(complexity$activity)])}")) 
+  
+  # The relatedness of cities is symmetric to activities.
+  city_share <- t(m / rowSums(m)) 
+  national_share_activity <- colSums(m)/sum(m)
+  
+  r_cc <- 0.5*(cov.wt(x = city_share, wt = national_share_activity, cor = TRUE)$cor + 1)
+  
+  complexity$city <- Re(eigen(r_cc/rowSums(r_cc))$vector[,2])
+  complexity$city <- (complexity$city - mean(complexity$city)) / sd(complexity$city)
+  names(complexity$city) <- rownames(m)
+  
+  #City complexity is positively correlated with the local share weighted mean complexity of activities in city c. 
+  
+  local_share_mean_complexity <- rowSums(m/colSums(m) * complexity$activity)
+  
+  if (cor(complexity$city, local_share_mean_complexity) < 0) {
+    complexity$city <- -1 * complexity$city
+  }
+  
+  rpt_city <- message(glue::glue("most complex city: {names(complexity$city[complexity$city == max(complexity$city)])}")) 
+  
+  if (verbose) {
+    rpt_activity
+    rpt_city
+  }
+  
+  out <- dplyr::inner_join(data, tibble::enframe(complexity$city), name = region, value = "city_complexity") |> 
+    dplyr::inner_join(tibble::enframe(complexity$activity), name = product, value = "activity_complexity")
+  
+  return(out)
+  
+  
+  
+  
+}
+
 #' Calculate economic complexity indicators for multiple years
 #'
 #' @param data data suitable for calculating complexity.
