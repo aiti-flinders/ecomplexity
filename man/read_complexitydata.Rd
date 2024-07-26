@@ -2,18 +2,25 @@
 % Please edit documentation in R/read_complexitydata.R
 \name{read_complexitydata}
 \alias{read_complexitydata}
-\title{Read economic complexity data from the complexitydata GitHub repository}
+\title{Read and load into the environment, economic complexity data from the complexitydata GitHub repository}
 \usage{
-read_complexitydata(
-  name = NULL,
-  refresh = FALSE,
-  export_dir = tempdir(),
-  .validate_name = TRUE
-)
+read_complexitydata(name = NULL, refresh = FALSE, export_dir = tempdir())
 }
 \arguments{
-\item{.validate_name}{}
+\item{name}{the name of the dataset available at \code{aiti-flinders/complexitydata}}
+
+\item{refresh}{TRUE to force re download the file, even if it already exists on disk.}
+
+\item{export_dir}{directory to save the downloaded file. The default saves to a temporary directory.}
+}
+\value{
+the downloaded data is loaded into the current R environment.
 }
 \description{
-Read economic complexity data from the complexitydata GitHub repository
+Read and load into the environment, economic complexity data from the complexitydata GitHub repository
+}
+\examples{
+\dontrun{
+read_complexitydata("sa3_indp1_occp1")
+}
 }

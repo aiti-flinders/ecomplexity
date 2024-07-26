@@ -1,18 +1,18 @@
-#' Read economic complexity data from the complexitydata GitHub repository
+#' Read and load into the environment, economic complexity data from the complexitydata GitHub repository
 #'
-#' @param name
-#' @param refresh
-#' @param export_dir
-#' @param .validate_name
+#' @param name the name of the dataset available at `aiti-flinders/complexitydata`
+#' @param refresh TRUE to force re download the file, even if it already exists on disk. 
+#' @param export_dir directory to save the downloaded file. The default saves to a temporary directory. 
 #'
-#' @return
+#' @return the downloaded data is loaded into the current R environment. 
 #' @export
 #'
-#' @examples
+#' @examples \dontrun{
+#' read_complexitydata("sa3_indp1_occp1")
+#' }
 read_complexitydata <- function(name = NULL,
                                 refresh = FALSE,
-                                export_dir = tempdir(),
-                                .validate_name = TRUE) {
+                                export_dir = tempdir()) {
   
   base_url <- "https://github.com/aiti-flinders/complexitydata/raw/master/data/"
   url <- paste0(base_url, name, ".rda")

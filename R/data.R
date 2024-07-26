@@ -1,56 +1,47 @@
-#' Harmonised System (1992) product data. 
-#' 
-#' A dataset containing the names, level, and product code of products categorised under the 
-#' 1992 version of the Harmonised System
-#' 
-#' @format A tibble with 6,406 rows and 5 columns:
-#' \describe{
-#' \item{product_id}{id}
-#' \item{hs_product_code}{character representation of the product code - HS92 4 digits}
-#' \item{hs_product_name_short_en}{english name of the product}
-#' \item{level}{level of detail the product is categorised under (can be section 2 digits, 4 digits, 6 digits)}
-#' \item{parent_id}{which overarching level the product fits under}
-#' }
-#' @source \url{https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/3BAL1O/WQZPYX&version=4.0}
-"product_data"
-
 #' Harmonised System (1992) product data.
 #' 
 #' A dataset containing the names, product code, group name and section name of products
 #' categorised under the 1992 version of the Harmonised System. 
+#' Highest level of disaggregation in this data set is the four-digit HS92
 #' 
-#' @format A tibble with 1,248 rows and 6 columns:
+#' @format Tibble with
 #' \describe{
-#' \item{product_id}{id}
-#' \item{parent_id}{link to products parent group}
-#' \item{hs_product_name_short_en}{english short name of the product}
-#' \item{hs_product_code}{character representation of the product code - HS92 4 digits}
-#' \item{group_name}{english short name of the product group}
-#' \item{section_name}{english short name of the product section}
+#' \item{product_id}{The product ID.}
+#' \item{parent_id}{The product ID of the product's parent.}
+#' \item{hs_product_name_short_en}{English short name of the product.}
+#' \item{hs_product_code}{Character representation of the product code at the four-digit HS92 level.}
+#' \item{group_name}{Name of the product group.}
+#' \item{section_name}{Name of the product section. }
 #' }
 #' @source \url{https://dataverse.harvard.edu/file.xhtml?persistentId=doi:10.7910/DVN/3BAL1O/WQZPYX&version=4.0}
-"product_data_all"
+"product_data"
 
 
-#' Atlas of Economic Complexity Countries.
-#' 
-#' The name and ISO-3 representation of countries included in the Atlas of Economic Complexity
-#' 
-#' @format A tibble with 133 rows and 2 columns:
-#' \describe{
-#' \item{Country}{Country}
-#' \item{location_code}{3-digit ISO country code}
-#' }
-"atlas_countries"
+
 
 #' ANZSIC to Harmonised System concordance
 #' 
-#' The relationship between product codes and Australian industry classifications.
+#' The relationship between product codes and Australian industry classifications. 
+#' Derived from Appendix 6.1 of the ABS International Merchandise Trade Australia: Concepts, Sources and Methods release. 
 #' 
-#' @format A tibble with 1,521 rows and 2 columns:
+#' @format Tibble with
 #' \describe{
 #' \item{hs_product_code}{character representation of the product code - HS92 4 digits}
 #' \item{anzsic}{character representation of the ANZSIC class}
 #' }
+#' @source \url{https://www.abs.gov.au/statistics/detailed-methodology-information/concepts-sources-methods/international-merchandise-trade-australia-concepts-sources-and-methods/latest-release}
 "anzsic_hs"
 
+#' Atlas of Economic Complexity colours and sectors.
+#' 
+#' The Atlas of Economic Complexity mapping between 4-digit HS92 product codes and industry sectors. 
+#' The specified colour is equivalent to the colours used on the Atlas website. 
+#' @format A tibble with 1,217 rows and 3 columns:
+#' \describe{
+#' \item{hs_product_code}{character representation of the product code - HS92 4 digits}
+#' \item{sector}{character representation of the Atlas sector}
+#' \item{colour}{hex code of the colour used on the Atlas website for each sector}
+#' }
+#' @source \url{https://doi.org/10.7910/DVN/3BAL1O}
+#'
+"complexity_classification"

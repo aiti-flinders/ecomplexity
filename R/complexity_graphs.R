@@ -12,20 +12,20 @@
 graph_complexity_rank <- function(data) {
   
   data_final <- data |> 
-    dplyr::slice_max(order_by = year) |> 
-    dplyr::distinct(location_code, eci_rank) |> 
-    dplyr::mutate(location_code = strayr::clean_state(location_code, to = "state_name"))
+    dplyr::slice_max(order_by = .data$year) |> 
+    dplyr::distinct(.data$location_code, .data$eci_rank) |> 
+    dplyr::mutate(location_code = strayr::clean_state(.data$location_code, to = "state_name"))
   
   data_first <- data |> 
-    dplyr::slice_min(order_by = year) |> 
-    dplyr::distinct(location_code, eci_rank) |> 
-    dplyr::mutate(location_code = strayr::clean_state(location_code, to = "state_name"))
+    dplyr::slice_min(order_by = .data$year) |> 
+    dplyr::distinct(.data$location_code, .data$eci_rank) |> 
+    dplyr::mutate(location_code = strayr::clean_state(.data$location_code, to = "state_name"))
   
   data |> 
-    dplyr::distinct(year, location_code, eci_rank) |> 
-    dplyr::mutate(year = as.Date(paste0(year, "0101"), format = "%Y%d%m"),
-                  location_code = strayr::clean_state(location_code, to = "state_name")) |> 
-    ggplot2::ggplot(ggplot2::aes(x = year, y = eci_rank, col = location_code, fill = location_code)) + 
+    dplyr::distinct(.data$year, .data$location_code, .data$eci_rank) |> 
+    dplyr::mutate(year = as.Date(paste0(.data$year, "0101"), format = "%Y%d%m"),
+                  location_code = strayr::clean_state(.data$location_code, to = "state_name")) |> 
+    ggplot2::ggplot(ggplot2::aes(x = .data$year, y = .data$eci_rank, col = .data$location_code, fill = .data$location_code)) + 
     ggplot2::geom_line(linewidth = 0.75) +
     ggplot2::geom_point(shape = 21, colour = "white", size = 2) +
     ggplot2::scale_y_reverse(
@@ -71,18 +71,20 @@ graph_complexity_rank <- function(data) {
 #' }
 graph_complexity_tree <- function(year, region) {
   
-  data <- read_complexitydata("state_economic_complexity") |> 
-    dplyr::inner_join(complexitydata::atlas_pci, by = c("hs_product_code", "year")) |> 
-    dplyr::filter(year == {{year}},
-                  location_code == {{region}},
-                  hs_product_code != "unspecified") |>
-    dplyr::mutate(export_value_share = scales::label_percent(accuracy = 0.1, scale = 100)(export_value/sum(export_value)),
-           pci_label = scales::label_number(accuracy = 0.01)(pci)) |> 
-    dplyr::left_join(product_data_all, by = "hs_product_code") |> 
-    ggplot2::ggplot(ggplot2::aes(area = export_value,
-               fill = round(pci, 3), 
-               subgroup = section_name, 
-               label = paste(hs_product_name_short_en, pci_label, sep = "\n"))) +
+  atlas_pci <- read_complexitydata("atlas_pci")
+  
+  data <- read_complexitydata("state_economic_complexity") 
+  
+  data |> 
+    dplyr::inner_join(atlas_pci, by = c("hs_product_code", "year")) |> 
+    dplyr::filter(.data$year == {{year}},
+                  .data$location_code == {{region}},
+                  .data$hs_product_code != "unspecified") |>
+    dplyr::mutate(export_value_share = scales::label_percent(accuracy = 0.1, scale = 100)(.data$export_value/sum(.data$export_value)),
+           pci_label = scales::label_number(accuracy = 0.01)(.data$pci)) |> 
+    dplyr::left_join(product_data, by = "hs_product_code") |> 
+    ggplot2::ggplot(ggplot2::aes(area = .data$export_value, fill = round(.data$pci, 3), subgroup = .data$section_name, 
+                                 label = paste(.data$hs_product_name_short_en, .data$pci_label, sep = "\n"))) +
     treemapify::geom_treemap(colour = "white") + 
     treemapify::geom_treemap_text(colour = "white", place = "centre", size = 15) + 
     treemapify::geom_treemap_subgroup_border(colour = "white", size = 1.5) + 
@@ -106,8 +108,8 @@ graph_complexity_tree <- function(year, region) {
 graph_complexity_product_space <- function(country, year, services = FALSE) {
     
     working_data <- read_complexitydata("combined_exports") |> 
-      dplyr::filter(year == {{year}},
-                    !is.na(as.numeric(hs_product_code)))
+      dplyr::filter(.data$year == {{year}},
+                    !is.na(as.numeric(.data$hs_product_code)))
     
     mcp <- working_data |> 
       economiccomplexity::balassa_index(discrete = TRUE,
@@ -119,7 +121,7 @@ graph_complexity_product_space <- function(country, year, services = FALSE) {
     m <- as.matrix(mcp) |> 
       as.data.frame() |> 
       tibble::rownames_to_column(var = "location_code") |> 
-      tidyr::pivot_longer(cols = -location_code,
+      tidyr::pivot_longer(cols = -.data$location_code,
                           values_to = "m",
                           names_to = "hs_product_code")
     
@@ -128,14 +130,14 @@ graph_complexity_product_space <- function(country, year, services = FALSE) {
     product_space_colours <- complexity_classification
     
     ps_data <- working_data |> 
-      dplyr::group_by(hs_product_code) |> 
-      dplyr::mutate(product_export_value = sum(export_value)) |> 
-      dplyr::filter(location_code == {{country}}) |> 
-      dplyr::left_join(m, by = dplyr::join_by(location_code, hs_product_code)) |> 
-      dplyr::left_join(product_space_colours, by = dplyr::join_by(hs_product_code == code))
-      dplyr::group_by(colour) |> 
+      dplyr::group_by(.data$hs_product_code) |> 
+      dplyr::mutate(product_export_value = sum(.data$export_value)) |> 
+      dplyr::filter(.data$location_code == {{country}}) |> 
+      dplyr::left_join(m, by = dplyr::join_by("location_code", "hs_product_code")) |> 
+      dplyr::left_join(product_space_colours, by = dplyr::join_by("hs_product_code" == "code"))
+      dplyr::group_by(.data$colour) |> 
       dplyr::mutate(colour_id = factor(m * dplyr::cur_group_id()), 
-                    colour = ifelse(colour_id == 0, "grey", colour)) |> 
+                    colour = ifelse(.data$colour_id == 0, "grey", .data$colour)) |> 
       dplyr::ungroup()
     
     
@@ -158,7 +160,7 @@ graph_complexity_product_space <- function(country, year, services = FALSE) {
     
     ggraph::ggraph(net$network_product, layout = "kk") +
       ggraph::geom_edge_link(edge_colour = "#a8a8a8", alpha = 0.1) + 
-      ggraph::geom_node_point(ggplot2::aes(size = size, colour = colour)) + 
+      ggraph::geom_node_point(ggplot2::aes(size = .data$size, colour = .data$colour)) + 
       ggplot2::scale_colour_manual(values = setNames(ps_data$colour, ps_data$colour_id))
     
     
@@ -166,6 +168,7 @@ graph_complexity_product_space <- function(country, year, services = FALSE) {
     
   }
 
+#' @importFrom grDevices rgb
 atlas_complexity_colours <- function() {
   
   rgbm <- function(r, g, b) {
