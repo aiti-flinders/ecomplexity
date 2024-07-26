@@ -5,16 +5,20 @@
 \alias{anzsic_hs}
 \title{ANZSIC to Harmonised System concordance}
 \format{
-A tibble with 1,521 rows and 2 columns:
+Tibble with
 \describe{
 \item{hs_product_code}{character representation of the product code - HS92 4 digits}
 \item{anzsic}{character representation of the ANZSIC class}
 }
+}
+\source{
+\url{https://www.abs.gov.au/statistics/detailed-methodology-information/concepts-sources-methods/international-merchandise-trade-australia-concepts-sources-and-methods/latest-release}
 }
 \usage{
 anzsic_hs
 }
 \description{
 The relationship between product codes and Australian industry classifications.
+Derived from Appendix 6.1 of the ABS International Merchandise Trade Australia: Concepts, Sources and Methods release.
 }
 \keyword{datasets}
