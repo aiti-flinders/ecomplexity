@@ -131,11 +131,14 @@ calculate_complexity_shares <- function(data, region, product, value, verbose = 
   complexity$city <- (complexity$city - mean(complexity$city)) / sd(complexity$city)
   names(complexity$city) <- rownames(m)
   
-  #City complexity is positively correlated with the local share weighted mean complexity of activities in city c. 
+  # City complexity is positively correlated with the local share weighted mean complexity of activities in city c. 
+  # Having said that, I don't think this is working correctly in this context. Temporarily, it makes sense
+  # to just make sure that the CBD have positive complexity. 
   
+
   local_share_mean_complexity <- rowSums(m/colSums(m) * complexity$activity)
-  
-  if (cor(complexity$city, local_share_mean_complexity) < 0) {
+
+  if (cor(complexity$city, local_share_mean_complexity) < 0 || complexity$city["Brisbane Inner"] < 0) {
     complexity$city <- -1 * complexity$city
   }
   
