@@ -149,8 +149,8 @@ calculate_complexity_shares <- function(data, region, product, value, verbose = 
     rpt_city
   }
   
-  out <- dplyr::inner_join(data, tibble::enframe(complexity$city), name = region, value = "city_complexity") |> 
-    dplyr::inner_join(tibble::enframe(complexity$activity), name = product, value = "activity_complexity")
+  out <- dplyr::inner_join(data, tibble::enframe(complexity$city, name = region, value = "city_complexity")) |> 
+    dplyr::inner_join(tibble::enframe(complexity$activity, name = product, value = "activity_complexity"))
   
   return(out)
   
