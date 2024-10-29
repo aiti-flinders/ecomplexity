@@ -29,8 +29,7 @@ graph_complexity_rank <- function(data) {
     ggplot2::geom_line(linewidth = 0.75) +
     ggplot2::geom_point(shape = 21, colour = "white", size = 2) +
     ggplot2::scale_y_reverse(
-      breaks = data_first$eci_rank,
-      labels = paste0(data_first$location_code, " (", data_first$eci_rank, ")"),
+      breaks = NULL,
       expand = c(0, 0),
       name = NULL, 
       sec.axis = ggplot2::dup_axis(
@@ -39,7 +38,8 @@ graph_complexity_rank <- function(data) {
         name = NULL
       )
     ) +
-    ggplot2::scale_x_date(limits = as.Date(c("19960101", "20210101"), format = "%Y%d%m"),
+    ggplot2::scale_x_date(limits = as.Date(c("19950101", "20210101"), format = "%Y%d%m"),
+                          name = NULL,
                           expand = ggplot2::expansion(mult = c(0.02, 0))) +
     ggplot2::scale_colour_manual(values = strayr::palette_state_name_2016,
                                  name = NULL) +
@@ -86,7 +86,7 @@ graph_complexity_tree <- function(year, region) {
     ggplot2::ggplot(ggplot2::aes(area = .data$export_value, fill = round(.data$pci, 3), subgroup = .data$section_name, 
                                  label = paste(.data$hs_product_name_short_en, .data$pci_label, sep = "\n"))) +
     treemapify::geom_treemap(colour = "white") + 
-    treemapify::geom_treemap_text(colour = "white", place = "centre", size = 15) + 
+    treemapify::geom_treemap_text(ggplot2::aes(colour = ggplot2::after_scale(prismatic::best_contrast(fill, c("white", "black")))), place = "centre", size = 15) + 
     treemapify::geom_treemap_subgroup_border(colour = "white", size = 1.5) + 
     ggplot2::scale_fill_gradientn(colours = atlas_complexity_colours()$colour, 
                                   values = atlas_complexity_colours()$percent, 
@@ -170,10 +170,10 @@ graph_complexity_product_space <- function(country, year, services = FALSE) {
 
 #' Data Coverage
 #'
-#' @param data 
-#' @param region 
-#' @param activity 
-#' @param flip 
+#' @param data economic complexity input data
+#' @param region quoted name of the region
+#' @param activity quoted name of the 'activity' or product
+#' @param flip logical to flip the graph
 #'
 #' @return ggplot2 object
 #' @export
@@ -206,6 +206,35 @@ graph_complexity_coverage <- function(data, region, activity, flip = FALSE) {
                    panel.border = ggplot2::element_rect(fill = NA),
                    legend.position = "none") + 
     ggplot2::coord_equal()
+}
+
+#' Complexity map
+#'
+#' @param data data of class sf
+#' @param fill.var quoted name of the variable used for the fill aesthetic 
+#'
+#' @return tmap object
+#' @export
+#'
+#' @examples \dontrun{
+#' graph_complexity_map(data, "city_complexity_index")}
+graph_complexity_map <- function(data, fill.var) {
+
+  tmap::tm_shape(data) |> 
+    tmap::tm_polygons(fill = fill.var,
+                      col = "grey80",
+                      lwd = 0.1,
+                      fill.scale = tmap::tm_scale_continuous(values = "greek"),
+                      fill.legend = tmap::tm_legend(title = "Regional Complexity",
+                                                    orientation = "landscape")) +
+    tmap::tm_place_legends_bottom()
+                        
+  
+}
+
+
+graph_complexity_circle <- function() {
+  
 }
 
 #' @importFrom grDevices rgb
