@@ -14,10 +14,12 @@ Imports:
     cowplot,
     dplyr,
     economiccomplexity,
+    forcats,
     ggplot2,
     ggraph,
     glue,
     igraph,
+    prismatic,
     purrr,
     rlang,
     scales,
@@ -25,6 +27,7 @@ Imports:
     strayr (>= 0.2.2.9002),
     tibble,
     tidyr,
+    tmap,
     treemapify
 Remotes: 
     aiti-flinders/complexitydata,

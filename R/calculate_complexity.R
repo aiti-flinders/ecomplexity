@@ -159,6 +159,17 @@ calculate_complexity_shares <- function(data, region, product, value, verbose = 
   
 }
 
+calculate_proximity <- function(data, region, product, value) {
+  
+  bi <- economiccomplexity::balassa_index(data, discrete = TRUE, country = {{region}}, product = {{product}},
+                                          value = {{value}})
+  
+  proximity <- economiccomplexity::proximity(bi)
+  
+  proximity
+  
+}
+
 #' Calculate economic complexity indicators for multiple years
 #'
 #' @param data data suitable for calculating complexity.
