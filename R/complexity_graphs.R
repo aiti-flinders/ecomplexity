@@ -220,7 +220,7 @@ graph_complexity_coverage <- function(data, region, activity, flip = FALSE) {
 #' graph_complexity_map(data, "city_complexity_index")}
 graph_complexity_map <- function(data, fill.var) {
 
-  tmap::tm_shape(data) |> 
+  tmap::tm_shape(data) + 
     tmap::tm_polygons(fill = fill.var,
                       col = "grey80",
                       lwd = 0.1,
