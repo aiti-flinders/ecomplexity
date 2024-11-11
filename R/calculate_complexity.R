@@ -149,8 +149,26 @@ calculate_complexity_shares <- function(data, region, product, value, verbose = 
     rpt_city
   }
   
+  relatedness_density <- (m/rowSums(m))%*%r_aa |> 
+    tibble::as_tibble(rownames = region) |> 
+    tidyr::pivot_longer(cols = -region,
+                        names_to = product,
+                        values_to = "relatedness_density")
+  
+  mean_local_relatedness <- m/rowSums(m)
+  
+  mean_local_relatedness <- mean_local_relatedness |> 
+    tibble::as_tibble(rownames = region) |> 
+    tidyr::pivot_longer(cols =-region,
+                        names_to = product,
+                        values_to = "mean_local_relatedness")
+  
+  
   out <- dplyr::inner_join(data, tibble::enframe(complexity$city, name = region, value = "city_complexity")) |> 
-    dplyr::inner_join(tibble::enframe(complexity$activity, name = product, value = "activity_complexity"))
+    dplyr::inner_join(tibble::enframe(complexity$activity, name = product, value = "activity_complexity")) |> 
+    dplyr::inner_join(relatedness_density) |> 
+    dplyr::inner_join(mean_local_relatedness) |> 
+    dplyr::mutate(mean_local_relatedness = mean_local_relatedness + relatedness_density)
   
   return(out)
   
