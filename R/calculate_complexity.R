@@ -101,7 +101,7 @@ calculate_complexity_shares <- function(data, region, product, value, verbose = 
   
   r_aa <- 0.5*(stats::cov.wt(x = activity_share, wt = national_share_employment, cor = TRUE)$cor + 1)
   
-  # Complexity of activity a is the element a of the standardized second eigenvector of the row-standardized relatedness matrix r_aa.
+  # Complexity of activity a is the element a of the standardized second eigenvector of the row-standardized relatedness matrix R = r_aa/rowSums(r_aa)
   
   complexity <- list()
   complexity$activity <- Re(eigen(r_aa/rowSums(r_aa))$vector[,2])
@@ -110,16 +110,15 @@ calculate_complexity_shares <- function(data, region, product, value, verbose = 
   
   names(complexity$activity) <- colnames(m)
   
-  # Complexity should be positively correlated with the weighted mean size of cities that contain activity a. 
-  ## Think: could it just be positively correlated with city size?
+  # Activity complexity is positively correlated with the weighted mean size of cities that contain activity a
   
-  weighted_mean_city_size <- colSums(m/colSums(m)*rowSums(m))
+  weighted_mean_city_size <- t(m/colSums(m)) %*% rowSums(m)
   
   if (cor(complexity$activity, weighted_mean_city_size) < 0) {
     complexity$activity <- -1*complexity$activity
   }
   
-  rpt_activity <-  message(glue::glue("most complex activity: {names(complexity$activity[complexity$activity == max(complexity$activity)])}")) 
+  rpt_activity <-  glue::glue("most complex activity: {names(complexity$activity[complexity$activity == max(complexity$activity)])}")
   
   # The relatedness of cities is symmetric to activities.
   city_share <- t(m / rowSums(m)) 
@@ -136,13 +135,13 @@ calculate_complexity_shares <- function(data, region, product, value, verbose = 
   # to just make sure that the CBD have positive complexity. 
   
 
-  local_share_mean_complexity <- rowSums(m/colSums(m) * complexity$activity)
+  local_share_mean_complexity <- activity_share %*% complexity$activity
 
-  if (cor(complexity$city, local_share_mean_complexity) < 0 || complexity$city["Brisbane Inner"] < 0) {
+  if (cor(complexity$city, local_share_mean_complexity) < 0) {
     complexity$city <- -1 * complexity$city
   }
   
-  rpt_city <- message(glue::glue("most complex city: {names(complexity$city[complexity$city == max(complexity$city)])}")) 
+  rpt_city <- glue::glue("most complex city: {names(complexity$city[complexity$city == max(complexity$city)])}")
   
   if (verbose) {
     rpt_activity
