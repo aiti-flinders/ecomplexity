@@ -95,6 +95,7 @@ calculate_complexity_shares <- function(data, region, product, value, verbose = 
   
   m <- data |> 
     tidyr::pivot_wider(id_cols = {{region}},
+                       values_fill = 0,
                        names_from = {{product}},
                        values_from = {{value}}) |> 
     tibble::column_to_rownames(var = region) |> 
