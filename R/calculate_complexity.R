@@ -18,7 +18,7 @@
 #' year = 1996)
 #'
 #' }
-calculate_complexity <- function(data, region, product, value, year) {
+calculate_complexity <- function(data, region, product, value, year, method = "eigenvalues") {
   
   data <- data |>
     dplyr::filter(year == {{year}})
@@ -35,7 +35,14 @@ calculate_complexity <- function(data, region, product, value, year) {
   bi <- economiccomplexity::balassa_index(data, discrete = TRUE, country = {{region}}, product = {{product}},
                                           value = {{value}})
   
+  if (method == "eigenvalues") {
   complexity <- economiccomplexity::complexity_measures(bi, method = "eigenvalues")
+  } else if (method == "fitness") {
+    complexity <- economiccomplexity::complexity_measures(bi, method = "fitness")
+  } else if (method == "shares") {
+    complexity <- calculate_complexity_shares(data, region, product, value, verbose = TRUE)
+    return(complexity)
+  }
   
   prox <- economiccomplexity::proximity(bi)
   
@@ -71,6 +78,7 @@ calculate_complexity <- function(data, region, product, value, year) {
 #' @param region variable in `data` which corresponds to a region.
 #' @param product variable in `data` which corresponds to a product. 
 #' @param value variable in `data` which corresponds to a value.
+#' @param method the method used to calculate economic complexity indicators. One of 'eigenvalue', 'fitness', or 'shares'.
 #' @param verbose logical. FALSE (the default) provides no messages to the user. 
 #'
 #' @return the supplied `data` with calculated city and activity complexity. 
@@ -104,21 +112,21 @@ calculate_complexity_shares <- function(data, region, product, value, verbose = 
   # Complexity of activity a is the element a of the standardized second eigenvector of the row-standardized relatedness matrix R = r_aa/rowSums(r_aa)
   
   complexity <- list()
-  complexity$activity <- Re(eigen(r_aa/rowSums(r_aa))$vector[,2])
+  complexity$complexity_index_product <- Re(eigen(r_aa/rowSums(r_aa))$vector[,2])
   #standardize
-  complexity$activity <- (complexity$activity - mean(complexity$activity))/sd(complexity$activity)
+  complexity$complexity_index_product <- (complexity$complexity_index_product - mean(complexity$complexity_index_product))/sd(complexity$complexity_index_product)
   
-  names(complexity$activity) <- colnames(m)
+  names(complexity$complexity_index_product) <- colnames(m)
   
   # Activity complexity is positively correlated with the weighted mean size of cities that contain activity a
   
   weighted_mean_city_size <- t(m/colSums(m)) %*% rowSums(m)
   
-  if (cor(complexity$activity, weighted_mean_city_size) < 0) {
-    complexity$activity <- -1*complexity$activity
+  if (cor(complexity$complexity_index_product, weighted_mean_city_size) < 0) {
+    complexity$complexity_index_product <- -1*complexity$complexity_index_product
   }
   
-  rpt_activity <-  glue::glue("most complex activity: {names(complexity$activity[complexity$activity == max(complexity$activity)])}")
+  rpt_activity <-  glue::glue("most complex activity: {names(complexity$complexity_index_product[complexity$complexity_index_product == max(complexity$complexity_index_product)])}")
   
   # The relatedness of cities is symmetric to activities.
   city_share <- t(m / rowSums(m)) 
@@ -126,22 +134,22 @@ calculate_complexity_shares <- function(data, region, product, value, verbose = 
   
   r_cc <- 0.5*(cov.wt(x = city_share, wt = national_share_activity, cor = TRUE)$cor + 1)
   
-  complexity$city <- Re(eigen(r_cc/rowSums(r_cc))$vector[,2])
-  complexity$city <- (complexity$city - mean(complexity$city)) / sd(complexity$city)
-  names(complexity$city) <- rownames(m)
+  complexity$complexity_index_country <- Re(eigen(r_cc/rowSums(r_cc))$vector[,2])
+  complexity$complexity_index_country <- (complexity$complexity_index_country - mean(complexity$complexity_index_country)) / sd(complexity$complexity_index_country)
+  names(complexity$complexity_index_country) <- rownames(m)
   
   # City complexity is positively correlated with the local share weighted mean complexity of activities in city c. 
   # Having said that, I don't think this is working correctly in this context. Temporarily, it makes sense
   # to just make sure that the CBD have positive complexity. 
   
 
-  local_share_mean_complexity <- activity_share %*% complexity$activity
+  local_share_mean_complexity <- activity_share %*% complexity$complexity_index_product
 
-  if (cor(complexity$city, local_share_mean_complexity) < 0) {
-    complexity$city <- -1 * complexity$city
+  if (cor(complexity$complexity_index_country, local_share_mean_complexity) < 0) {
+    complexity$complexity_index_country <- -1 * complexity$complexity_index_country
   }
   
-  rpt_city <- glue::glue("most complex city: {names(complexity$city[complexity$city == max(complexity$city)])}")
+  rpt_city <- glue::glue("most complex city: {names(complexity$complexity_index_country[complexity$complexity_index_country == max(complexity$complexity_index_country)])}")
   
   if (verbose) {
     rpt_activity
@@ -163,8 +171,8 @@ calculate_complexity_shares <- function(data, region, product, value, verbose = 
                         values_to = "mean_local_relatedness")
   
   
-  out <- dplyr::inner_join(data, tibble::enframe(complexity$city, name = region, value = "city_complexity")) |> 
-    dplyr::inner_join(tibble::enframe(complexity$activity, name = product, value = "activity_complexity")) |> 
+  out <- dplyr::inner_join(data, tibble::enframe(complexity$complexity_index_country, name = region, value = "country_complexity_index")) |> 
+    dplyr::inner_join(tibble::enframe(complexity$complexity_index_product, name = product, value = "product_complexity_index")) |> 
     dplyr::inner_join(relatedness_density) |> 
     dplyr::inner_join(mean_local_relatedness) |> 
     dplyr::mutate(mean_local_relatedness = mean_local_relatedness + relatedness_density)

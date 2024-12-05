@@ -4,7 +4,14 @@
 \alias{calculate_complexity}
 \title{Calculate economic complexity indicators}
 \usage{
-calculate_complexity(data, region, product, value, year)
+calculate_complexity(
+  data,
+  region,
+  product,
+  value,
+  year,
+  method = "eigenvalues"
+)
 }
 \arguments{
 \item{data}{data suitable for calculating complexity.}

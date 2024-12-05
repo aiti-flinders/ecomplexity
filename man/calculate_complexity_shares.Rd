@@ -16,6 +16,8 @@ calculate_complexity_shares(data, region, product, value, verbose = FALSE)
 \item{value}{variable in \code{data} which corresponds to a value.}
 
 \item{verbose}{logical. FALSE (the default) provides no messages to the user.}
+
+\item{method}{the method used to calculate economic complexity indicators. One of 'eigenvalue', 'fitness', or 'shares'.}
 }
 \value{
 the supplied \code{data} with calculated city and activity complexity.
