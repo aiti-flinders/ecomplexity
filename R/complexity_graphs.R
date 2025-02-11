@@ -11,20 +11,26 @@
 #' }
 graph_complexity_rank <- function(data) {
   
+  data <- data |> 
+    dplyr::distinct(.data$year, .data$location_code, .data$eci_rank) |> 
+    dplyr::mutate(year = as.Date(paste0(year, "0101"), format = "%Y%d%m"),
+                  location_code = strayr::clean_state(.data$location_code, to = "state_name"))
+  
   data_final <- data |> 
     dplyr::slice_max(order_by = .data$year) |> 
-    dplyr::distinct(.data$location_code, .data$eci_rank) |> 
+    dplyr::distinct(.data$location_code, eci_rank_final = .data$eci_rank) |> 
     dplyr::mutate(location_code = strayr::clean_state(.data$location_code, to = "state_name"))
   
   data_first <- data |> 
     dplyr::slice_min(order_by = .data$year) |> 
-    dplyr::distinct(.data$location_code, .data$eci_rank) |> 
+    dplyr::distinct(.data$location_code, eci_rank_first = .data$eci_rank) |> 
     dplyr::mutate(location_code = strayr::clean_state(.data$location_code, to = "state_name"))
   
+  data <- data |> 
+    dplyr::inner_join(data_first, by = c("location_code")) |> 
+    dplyr::inner_join(data_final, by = c("location_code"))
+  
   data |> 
-    dplyr::distinct(.data$year, .data$location_code, .data$eci_rank) |> 
-    dplyr::mutate(year = as.Date(paste0(.data$year, "0101"), format = "%Y%d%m"),
-                  location_code = strayr::clean_state(.data$location_code, to = "state_name")) |> 
     ggplot2::ggplot(ggplot2::aes(x = .data$year, y = .data$eci_rank, col = .data$location_code, fill = .data$location_code)) + 
     ggplot2::geom_line(linewidth = 0.75) +
     ggplot2::geom_point(shape = 21, colour = "white", size = 2) +
@@ -33,12 +39,12 @@ graph_complexity_rank <- function(data) {
       expand = c(0, 0),
       name = NULL, 
       sec.axis = ggplot2::dup_axis(
-        breaks = data_final$eci_rank,
-        labels = paste0(data_final$location_code, " (", data_final$eci_rank, ")"),
+        breaks = unique(data$eci_rank_final),
+        labels = paste0(unique(data$location_code), " (", unique(data$eci_rank_final), ")"),
         name = NULL
       )
     ) +
-    ggplot2::scale_x_date(limits = as.Date(c("19950101", "20210101"), format = "%Y%d%m"),
+    ggplot2::scale_x_date(limits = as.Date(c("19950101", "20220101"), format = "%Y%d%m"),
                           name = NULL,
                           expand = ggplot2::expansion(mult = c(0.02, 0))) +
     ggplot2::scale_colour_manual(values = strayr::palette_state_name_2016,
@@ -69,21 +75,16 @@ graph_complexity_rank <- function(data) {
 #' @examples \dontrun{
 #' graph_complexity_tree(2021, "SA")
 #' }
-graph_complexity_tree <- function(year, region) {
-  
-  atlas_pci <- read_complexitydata("atlas_pci")
-  
-  data <- read_complexitydata("state_economic_complexity") 
+graph_complexity_tree <- function(data, year, region) {
   
   data |> 
-    dplyr::inner_join(atlas_pci, by = c("hs_product_code", "year")) |> 
     dplyr::filter(.data$year == {{year}},
                   .data$location_code == {{region}},
                   .data$hs_product_code != "unspecified") |>
     dplyr::mutate(export_value_share = scales::label_percent(accuracy = 0.1, scale = 100)(.data$export_value/sum(.data$export_value)),
-                  pci_label = scales::label_number(accuracy = 0.01)(.data$pci)) |> 
+                  pci_label = scales::label_number(accuracy = 0.01)(.data$product_complexity_index)) |> 
     dplyr::left_join(product_data, by = "hs_product_code") |> 
-    ggplot2::ggplot(ggplot2::aes(area = .data$export_value, fill = round(.data$pci, 3), subgroup = .data$section_name, 
+    ggplot2::ggplot(ggplot2::aes(area = .data$export_value, fill = round(.data$product_complexity_index, 3), subgroup = .data$section_name, 
                                  label = paste(.data$hs_product_name_short_en, .data$pci_label, sep = "\n"))) +
     treemapify::geom_treemap(colour = "white") + 
     treemapify::geom_treemap_text(ggplot2::aes(colour = ggplot2::after_scale(prismatic::best_contrast(fill, c("white", "black")))), place = "centre", size = 15) + 
@@ -237,7 +238,9 @@ graph_complexity_circle <- function() {
   
 }
 
+#' Atlas of Economic Complexity PCI colour map
 #' @importFrom grDevices rgb
+#' @export
 atlas_complexity_colours <- function() {
   
   rgbm <- function(r, g, b) {

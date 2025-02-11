@@ -2,6 +2,7 @@
 
 export(add_product_colours)
 export(add_product_names)
+export(atlas_complexity_colours)
 export(calculate_complexity)
 export(calculate_complexity_shares)
 export(calculate_complexity_time_series)
