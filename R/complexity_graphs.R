@@ -11,6 +11,8 @@
 #' }
 graph_complexity_rank <- function(data) {
   
+  if(!all(c("year", "location_code", "eci_rank", "eci_rank_first", "eci_rank_final") %in% colnames(data))) {
+  
   data <- data |> 
     dplyr::distinct(.data$year, .data$location_code, .data$eci_rank) |> 
     dplyr::mutate(year = as.Date(paste0(year, "0101"), format = "%Y%d%m"),
@@ -29,6 +31,7 @@ graph_complexity_rank <- function(data) {
   data <- data |> 
     dplyr::inner_join(data_first, by = c("location_code")) |> 
     dplyr::inner_join(data_final, by = c("location_code"))
+  } 
   
   data |> 
     ggplot2::ggplot(ggplot2::aes(x = .data$year, y = .data$eci_rank, col = .data$location_code, fill = .data$location_code)) + 
